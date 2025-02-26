@@ -1,0 +1,47 @@
+{
+    "project_info": {
+      "project_number": "491011553709",
+      "project_id": "budgettracker-136e8",
+      "storage_bucket": "budgettracker-136e8.firebasestorage.app"
+    },
+    "client": [
+      {
+        "client_info": {
+          "mobilesdk_app_id": "1:491011553709:android:0815e9d10701878ecdc924",
+          "android_client_info": {
+            "package_name": "com.budgettracker"
+          }
+        },
+        "oauth_client": [
+          {
+            "client_id": "491011553709-b2h1du6dt547u0acmou4oppr3tfk218j.apps.googleusercontent.com",
+            "client_type": 1,
+            "android_info": {
+              "package_name": "com.budgettracker",
+              "certificate_hash": "c5222441f8c299d2bc34f67c146a157b8530ea0c"
+            }
+          },
+          {
+            "client_id": "491011553709-6ki02d8h87kimv9df2irvvi3mnmlnl0p.apps.googleusercontent.com",
+            "client_type": 3
+          }
+        ],
+        "api_key": [
+          {
+            "current_key": "AIzaSyABea1KDaeteOUzd0Nd_2tDeS8BadU07F8"
+          }
+        ],
+        "services": {
+          "appinvite_service": {
+            "other_platform_oauth_client": [
+              {
+                "client_id": "491011553709-6ki02d8h87kimv9df2irvvi3mnmlnl0p.apps.googleusercontent.com",
+                "client_type": 3
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "configuration_version": "1"
+  }
