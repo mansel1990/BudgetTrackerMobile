@@ -1,13 +1,15 @@
 import axios from "axios";
 
 export const api = axios.create({
-  baseURL: "http://localhost:3000/api", // Your Next.js API URL
+  baseURL: "https://budget-tracker-swart-sigma.vercel.app/api",
   headers: {
     "Content-Type": "application/json",
+    Accept: "*/*",
+    "Accept-Language": "en-US,en;q=0.9",
   },
+  withCredentials: true,
 });
 
-// Add response interceptor for error handling
 api.interceptors.response.use(
   (response) => response,
   (error) => {

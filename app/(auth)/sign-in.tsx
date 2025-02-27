@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -5,14 +6,68 @@ import {
   Dimensions,
   Image,
   SafeAreaView,
+  Alert,
 } from "react-native";
-import React from "react";
 import GoogleSignInButton from "@/components/GoogleSignInButton";
 import { useAuth } from "@/context/AuthContext";
 import { LinearGradient } from "expo-linear-gradient";
+import * as Google from "expo-auth-session/providers/google";
+import * as WebBrowser from "expo-web-browser";
+import { makeRedirectUri } from "expo-auth-session";
+import {
+  GoogleAuthProvider,
+  signInWithCredential,
+  getAuth,
+} from "firebase/auth";
+import { auth } from "@/firebase";
 
-export default function SignInScreen() {
+WebBrowser.maybeCompleteAuthSession();
+
+const SignInScreen = () => {
+  const [loading, setLoading] = useState(false); // Add loading state
+  const [error, setError] = useState(null); // Add error state
   const { user } = useAuth();
+  const [request, response, promptAsync] = Google.useAuthRequest({
+    androidClientId:
+      "491011553709-b2h1du6dt547u0acmou4oppr3tfk218j.apps.googleusercontent.com",
+    webClientId:
+      "491011553709-6ki02d8h87kimv9df2irvvi3mnmlnl0p.apps.googleusercontent.com",
+    responseType: "id_token",
+    scopes: ["profile", "email"],
+    extraParams: {
+      access_type: "offline",
+      prompt: "consent",
+    },
+    redirectUri: makeRedirectUri({
+      native: "shop.enkasu.budgettracker://oauth2redirect",
+    }),
+  });
+
+  const handleGoogleSignIn = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      setLoading(true);
+      const result = await promptAsync();
+      console.log("Auth result:", result);
+
+      if (result?.type === "success") {
+        const credential = GoogleAuthProvider.credential(
+          result.authentication?.idToken,
+          result.authentication?.accessToken
+        );
+        await signInWithCredential(auth, credential);
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        setError(error.message as unknown as null);
+      } else {
+        setError("An unknown error occurred" as unknown as null);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -39,14 +94,22 @@ export default function SignInScreen() {
           ) : (
             <View style={styles.signInContainer}>
               <Text style={styles.signInText}>Get Started</Text>
-              <GoogleSignInButton />
+              {loading ? (
+                <Text>Signing in...</Text> // Display a loading indicator
+              ) : error ? (
+                <Text style={{ color: "red" }}>{error}</Text> // Display error message
+              ) : (
+                <GoogleSignInButton onPress={handleGoogleSignIn} />
+              )}
             </View>
           )}
         </View>
       </LinearGradient>
     </SafeAreaView>
   );
-}
+};
+
+export default SignInScreen;
 
 const styles = StyleSheet.create({
   container: {

@@ -15,10 +15,11 @@ import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { View, ActivityIndicator, StyleSheet } from "react-native";
 import { Colors } from "@/constants/Colors";
+import { Provider as PaperProvider } from "react-native-paper";
 
 SplashScreen.preventAutoHideAsync();
 function RootLayoutNav() {
-  const { user, isLoading: authLoading } = useAuth(); // Add isLoading from auth context
+  const { user, loading: authLoading } = useAuth(); // Add isLoading from auth context
   const segments = useSegments();
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
@@ -60,7 +61,18 @@ export default function RootLayout() {
   const [loaded] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
   });
-  const queryClient = new QueryClient();
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: 2,
+        retryDelay: 1000,
+        staleTime: 300000, // 5 minutes
+        gcTime: 3600000, // 1 hour
+        refetchOnWindowFocus: false,
+        refetchOnReconnect: true,
+      },
+    },
+  });
 
   useEffect(() => {
     if (loaded) {
@@ -74,12 +86,14 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <QueryClientProvider client={queryClient}>
-        <AuthProvider>
-          <RootLayoutNav />
-          <StatusBar style="auto" />
-        </AuthProvider>
-      </QueryClientProvider>
+      <PaperProvider>
+        <QueryClientProvider client={queryClient}>
+          <AuthProvider>
+            <RootLayoutNav />
+            <StatusBar style="auto" />
+          </AuthProvider>
+        </QueryClientProvider>
+      </PaperProvider>
     </ThemeProvider>
   );
 }

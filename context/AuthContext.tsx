@@ -1,42 +1,83 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
-import { onAuthStateChanged, User } from "firebase/auth";
+import {
+  onAuthStateChanged,
+  User,
+  signOut as firebaseSignOut,
+} from "firebase/auth";
 import { auth } from "../firebase";
 
-interface AuthContextProps {
+// Define the type for your context
+interface AuthContextType {
   user: User | null;
+  loading: boolean;
+  error: string | null; // Add an error state
   signOut: () => Promise<void>;
-  isLoading: boolean;
 }
 
-const AuthContext = createContext<AuthContextProps>({
+// Create the context
+const AuthContext = createContext<AuthContextType>({
   user: null,
+  loading: true,
+  error: null,
   signOut: async () => Promise.resolve(),
-  isLoading: true,
 });
 
-interface AuthProviderProps {
-  children: React.ReactNode;
-}
-
-export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+// AuthProvider component
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null); // Add error state
 
-  // Update your auth state listener to include loading state
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
-      setIsLoading(false);
-    });
+    const unsubscribe = onAuthStateChanged(
+      auth as any,
+      (user) => {
+        setUser(user);
+        setLoading(false);
+        setError(null); // Clear any previous errors
+      },
+      (error) => {
+        setLoading(false);
+        if (error instanceof Error) {
+          setError(error.message); // Set the error message
+        } else {
+          setError("An unexpected error occurred."); // Handle non-Error types
+        }
+      }
+    );
 
-    return unsubscribe;
+    return () => unsubscribe();
   }, []);
 
+  const signOut = async () => {
+    try {
+      setLoading(true);
+      setError(null); // Clear any previous errors
+      await firebaseSignOut(auth as any);
+    } catch (error: unknown) {
+      setLoading(false);
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError("An unexpected error occurred.");
+      }
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, signOut: auth.signOut, isLoading }}>
+    <AuthContext.Provider value={{ user, loading, error, signOut }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-export const useAuth = () => useContext(AuthContext);
+// Custom hook for accessing the context
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (context === null) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
+};

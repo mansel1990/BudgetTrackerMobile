@@ -7,4 +7,7 @@ export const Colors = {
     secondary: "#64748b",
   },
   border: "#e1e1e1",
+  card: "#ffffff",
+  success: "#2ecc71", // For income
+  danger: "#e74c3c",
 };

@@ -1,33 +1,51 @@
-import { StyleSheet, View, Button } from 'react-native';
-import { auth, googleProvider } from '../firebase';
-import { signInWithPopup } from "firebase/auth";
-import React from 'react';
+import { StyleSheet, View, TouchableOpacity, Text, Image } from "react-native";
+import React from "react";
 
-export default function GoogleSignInButton() {
+interface GoogleSignInButtonProps {
+  onPress: () => Promise<void>;
+}
 
-    const handleGoogleSignIn = async () => {
-        try {
-            await signInWithPopup(auth, googleProvider);
-            // Redirect to the app or dashboard after successful login
-        } catch (error) {
-            console.error("Google Sign In Error:", error);
-        }
-    };
-    return (
-        <View style={styles.container}>
-            <Button title="Sign in with Google" onPress={handleGoogleSignIn} />
-        </View>
-    );
+export default function GoogleSignInButton({
+  onPress,
+}: GoogleSignInButtonProps) {
+  return (
+    <TouchableOpacity style={styles.button} onPress={onPress}>
+      <View style={styles.content}>
+        <Image
+          source={require("@/assets/google-logo.png")}
+          style={styles.logo}
+        />
+        <Text style={styles.text}>Sign in with Google</Text>
+      </View>
+    </TouchableOpacity>
+  );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        padding: 10,
-        margin: 10,
-        borderRadius: 5,
-        backgroundColor: '#eee', // Light gray background
-    },
-    button: {
-        // You can add more specific button styles here if needed
-    },
+  button: {
+    backgroundColor: "#ffffff",
+    borderRadius: 4,
+    padding: 12,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    minWidth: 240,
+  },
+  content: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  logo: {
+    width: 24,
+    height: 24,
+    marginRight: 12,
+  },
+  text: {
+    color: "#757575",
+    fontSize: 16,
+    fontWeight: "500",
+  },
 });
