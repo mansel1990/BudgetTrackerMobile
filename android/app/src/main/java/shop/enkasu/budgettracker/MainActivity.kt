@@ -1,4 +1,4 @@
-package com.budgettracker
+package shop.enkasu.budgettracker
 
 import android.os.Build
 import android.os.Bundle

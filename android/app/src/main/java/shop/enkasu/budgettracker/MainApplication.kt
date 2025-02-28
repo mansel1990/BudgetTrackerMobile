@@ -1,4 +1,4 @@
-package com.budgettracker
+package shop.enkasu.budgettracker
 
 import android.app.Application
 import android.content.res.Configuration

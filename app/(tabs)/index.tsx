@@ -4,31 +4,15 @@ import {
   StyleSheet,
   TouchableOpacity,
   ActivityIndicator,
-  Platform,
 } from "react-native";
 import React from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Colors } from "@/constants/Colors";
-import { api } from "@/lib/axios";
-import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { DatePickerModal } from "react-native-paper-dates";
 import { differenceInDays } from "date-fns";
-
-const useBalanceStats = (from: Date, to: Date) => {
-  return useQuery({
-    queryKey: ["balance", from, to],
-    queryFn: async () => {
-      const { data } = await api.get("/stats/balance", {
-        params: {
-          from: from.toISOString(),
-          to: to.toISOString(),
-        },
-      });
-      return data;
-    },
-  });
-};
+import { getBalanceStats } from "@/api/transactions";
+import { router } from "expo-router";
 
 const MAX_DATE_RANGE_DAYS = 90;
 
@@ -42,9 +26,12 @@ export default function HomeScreen() {
   const [isFromPickerVisible, setFromPickerVisible] = useState(false);
   const [isToPickerVisible, setToPickerVisible] = useState(false);
 
-  const { data: balanceStats, isLoading } = useBalanceStats(
-    dateRange.from,
-    dateRange.to
+  const formattedFrom = dateRange.from.toISOString().split("T")[0];
+  const formattedTo = dateRange.to.toISOString().split("T")[0];
+
+  const { data: balanceStats, isLoading } = getBalanceStats(
+    formattedFrom,
+    formattedTo
   );
 
   // Add date picker handlers
@@ -69,6 +56,22 @@ export default function HomeScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
+        <Text style={styles.welcomeText}>Welcome, Mansel Family</Text>
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            style={[styles.actionButton, styles.incomeButton]}
+            onPress={() => router.push("/(tabs)/transactions/new?type=income")}
+          >
+            <Text style={styles.actionButtonText}>New Income 🤑</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.actionButton, styles.expenseButton]}
+            onPress={() => router.push("/(tabs)/transactions/new?type=expense")}
+          >
+            <Text style={styles.actionButtonText}>New Expense 💸</Text>
+          </TouchableOpacity>
+        </View>
         <Text style={styles.headerTitle}>Overview</Text>
         <View style={styles.datePickerContainer}>
           <TouchableOpacity
@@ -77,7 +80,7 @@ export default function HomeScreen() {
               console.log("Opening From Picker");
               setFromPickerVisible(true);
             }}
-            activeOpacity={0.7} // Makes sure touch effect is visible
+            activeOpacity={0.7}
           >
             <Text style={styles.dateButtonText}>
               {dateRange.from.toLocaleDateString()}
@@ -97,7 +100,7 @@ export default function HomeScreen() {
 
       <DatePickerModal
         mode="single"
-        locale="in"
+        locale="en"
         visible={isFromPickerVisible}
         onDismiss={() => setFromPickerVisible(false)}
         date={dateRange.from}
@@ -155,11 +158,36 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
+  buttonContainer: {
+    flexDirection: "row",
+    gap: 10,
+    marginBottom: 16,
+  },
+  actionButton: {
+    flex: 1,
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+  },
+  incomeButton: {
+    backgroundColor: Colors.success + "20",
+    borderColor: Colors.success,
+  },
+  expenseButton: {
+    backgroundColor: Colors.danger + "20",
+    borderColor: Colors.danger,
+  },
+  actionButtonText: {
+    textAlign: "center",
+    fontSize: 14,
+    fontWeight: "500",
+    color: Colors.text.primary,
+  },
   statsContainer: {
     width: "100%",
     padding: 20,
     gap: 15,
-    marginTop: 20,
+    marginTop: 0,
   },
   statLabel: {
     fontSize: 16,
